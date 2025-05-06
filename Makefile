@@ -1,30 +1,25 @@
 # Project Name
 TARGET = hello_nds
 
-# Source Files
-SOURCES = source/main.c
-ASOURCES = source/arm9/crt0.s
-
-# Directories
-BUILD = build
-
-# Toolchain
+# Toolchain - Use the one in container's PATH
 PREFIX = arm-none-eabi-
 CC = $(PREFIX)gcc
 AS = $(PREFIX)as
 LD = $(PREFIX)gcc
 OBJCOPY = $(PREFIX)objcopy
 
+# Source Files
+SOURCES = source/main.c
+ASOURCES = source/arm9/crt0.s
+
 # Flags
 ARCH = -mthumb -mthumb-interwork
-CFLAGS = -Wall -O2 -fno-strict-aliasing $(ARCH) \
-         -I/opt/devkitpro/libnds/include
-LDFLAGS = $(ARCH) -specs=ds_arm9.specs \
-          -L/opt/devkitpro/libnds/lib \
-          -L/opt/devkitpro/devkitARM/lib
-LIBS = -lnds -lfat -lmm9 -lnds9
+CFLAGS = -Wall -O2 $(ARCH) -I/opt/devkitpro/libnds/include
+LDFLAGS = $(ARCH) -specs=ds_arm9.specs -L/opt/devkitpro/libnds/lib
+LIBS = -lnds
 
 # File Lists
+BUILD = build
 OFILES = $(addprefix $(BUILD)/,$(notdir $(SOURCES:.c=.o)))
 AFILES = $(addprefix $(BUILD)/,$(notdir $(ASOURCES:.s=.o)))
 
