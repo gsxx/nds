@@ -17,7 +17,7 @@ ARCH        = -mthumb -mthumb-interwork
 CFLAGS      = -Wall -O2 $(ARCH)
 CXXFLAGS    = $(CFLAGS) -fno-rtti -fno-exceptions
 ASFLAGS     = $(ARCH)
-LDFLAGS     = $(ARCH) -specs=ds_arm9.specs
+LDFLAGS = $(ARCH) -specs=ds_arm9.specs -L$(DEVKITPRO)/libnds/lib
 
 # --- You shouldn't need to edit below this line ---
 BUILD       = build

@@ -10,7 +10,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+      - name: Check libnds installation
+        run: |
+          ls /opt/devkitpro/libnds  
+          dkp-pacman -Q | grep libnds 
       - name: Compile NDS Homebrew
         run: |
           make  # Assumes you have a Makefile
