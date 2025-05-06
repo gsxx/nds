@@ -1,22 +1,22 @@
-name: Build NDS Homebrew  # Nombre del workflow
+name: Build NDS Homebrew
 
-on:  # Eventos que activan el workflow
+on:
   push:
-    branches: [ main ]    # Se ejecuta en pushes a "main"
-  pull_request:           # y en PRs
+    branches: [ main ]
+  pull_request:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Sistema operativo
-    container:              # Contenedor Docker oficial de devkitPro
+    runs-on: ubuntu-latest
+    container:
       image: devkitpro/devkitarm:latest
-      options: --user root  # Permisos necesarios
+      options: --user root
 
     steps:
-      - name: Checkout code  # Descarga tu código
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Verify Environment  # Verifica herramientas
+      - name: Verify Environment
         run: |
           echo "=== Versiones ==="
           arm-none-eabi-gcc --version
@@ -24,12 +24,12 @@ jobs:
           echo "=== PATH ==="
           echo $PATH
 
-      - name: Build NDS ROM  # Compilación
+      - name: Build NDS ROM
         run: |
-          make -j$(nproc)    # Compila en paralelo
+          make -j$(nproc)
 
-      - name: Upload Artifact  # Sube el ROM
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: nds-rom
-          path: *.nds        # Archivos .nds generados
+          path: "*.nds"  # ¡Corrección clave: comillas alrededor del patrón!
