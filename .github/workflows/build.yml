@@ -1,6 +1,9 @@
 name: Build NDS Homebrew
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
 
 jobs:
   build:
@@ -10,18 +13,42 @@ jobs:
       options: --user root
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
           sudo dkp-pacman -Syu --noconfirm
-          sudo dkp-pacman -S --noconfirm libnds libcalico nds-tools
+          sudo dkp-pacman -S --noconfirm \
+            devkitARM \
+            libnds \
+            ndstool \
+            general-tools
+          
+          # Verificación crítica
+          echo "=== Herramientas instaladas ==="
+          ls -la /opt/devkitpro/libnds/lib/libnds*
+          which arm-none-eabi-gcc
+          which ndstool
 
-      - name: Build
+      - name: Build ROM
         run: |
+          export DEVKITPRO=/opt/devkitpro
+          export DEVKITARM=$DEVKITPRO/devkitARM
+          export PATH=$DEVKITARM/bin:$PATH
+          
           make -j$(nproc)
+          
+          # Verificación del output
+          if [ ! -f *.nds ]; then
+            echo "::error::No se generó el archivo .nds"
+            ls -la
+            exit 1
+          fi
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
           name: nds-rom
           path: "*.nds"
+          retention-days: 1
