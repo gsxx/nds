@@ -16,20 +16,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Verify Environment
+      - name: Set up environment
         run: |
-          echo "=== Versiones ==="
-          arm-none-eabi-gcc --version
-          ndstool --version
-          echo "=== PATH ==="
-          echo $PATH
+          # Configura las variables esenciales
+          echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
+          echo "DEVKITARM=/opt/devkitpro/devkitARM" >> $GITHUB_ENV
+          echo "PATH=$DEVKITARM/bin:$PATH" >> $GITHUB_ENV
 
-      - name: Build NDS ROM
+      - name: Verify tools
+        run: |
+          echo "=== Herramientas ==="
+          ls -la $DEVKITARM/bin/arm-none-eabi-gcc  # Verifica que el compilador existe
+          $DEVKITARM/bin/arm-none-eabi-gcc --version
+          ndstool --version
+
+      - name: Build
         run: |
           make -j$(nproc)
 
-      - name: Upload Artifact
+      - name: Upload ROM
         uses: actions/upload-artifact@v4
         with:
           name: nds-rom
-          path: "*.nds"  # ¡Corrección clave: comillas alrededor del patrón!
+          path: "*.nds"
