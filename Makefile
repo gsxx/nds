@@ -1,55 +1,33 @@
-# Project Name (Output ROM will be this name)
-TARGET      = my_nds_game
-
-# Source Files
-SOURCES     = source/main.c
-# Add more .c files as needed:
-# SOURCES += source/graphics.c source/input.c
-
-# Asset Directories (optional)
-# DATA       = data
-
-# Libraries (libnds is required)
-LIBS        = -lnds
+TARGET = my_nds_game
+SOURCES = source/main.c
+LIBS = -lnds
 
 # Compiler Flags
-ARCH        = -mthumb -mthumb-interwork
-CFLAGS      = -Wall -O2 $(ARCH)
-CXXFLAGS    = $(CFLAGS) -fno-rtti -fno-exceptions
-ASFLAGS     = $(ARCH)
+ARCH = -mthumb -mthumb-interwork
+CFLAGS = -Wall -O2 $(ARCH) -I$(DEVKITPRO)/libnds/include
 LDFLAGS = $(ARCH) -specs=ds_arm9.specs -L$(DEVKITPRO)/libnds/lib
 
-# --- You shouldn't need to edit below this line ---
-BUILD       = build
-EXEFS       = $(BUILD)/$(TARGET).elf
-ROM         = $(TARGET).nds
-ARM9BIN     = $(BUILD)/$(TARGET).arm9
+# --- Don't edit below ---
+DEVKITPRO ?= /opt/devkitpro
+DEVKITARM ?= $(DEVKITPRO)/devkitARM
+PREFIX = $(DEVKITARM)/bin/arm-none-eabi-
 
-# devkitPro Paths
-DEVKITPRO   ?= /opt/devkitpro
-DEVKITARM   ?= $(DEVKITPRO)/devkitARM
-PREFIX      = $(DEVKITARM)/bin/arm-none-eabi-
+CC = $(PREFIX)gcc
+LD = $(PREFIX)gcc
+OBJCOPY = $(PREFIX)objcopy
 
-CC          = $(PREFIX)gcc
-CXX         = $(PREFIX)g++
-AS          = $(PREFIX)as
-LD          = $(PREFIX)gcc
-OBJCOPY     = $(PREFIX)objcopy
+BUILD = build
+OFILES = $(addprefix $(BUILD)/,$(notdir $(SOURCES:.c=.o)))
 
-# File Lists
-OFILES      = $(addprefix $(BUILD)/,$(notdir $(SOURCES:.c=.o)))
-DEPS        = $(OFILES:.o=.d)
+all: $(TARGET).nds
 
-# Rules
-all: $(ROM)
-
-$(ROM): $(ARM9BIN)
+$(TARGET).nds: $(BUILD)/$(TARGET).arm9
 	ndstool -c $@ -9 $<
 
-$(ARM9BIN): $(EXEFS)
+$(BUILD)/$(TARGET).arm9: $(BUILD)/$(TARGET).elf
 	$(OBJCOPY) -O binary $< $@
 
-$(EXEFS): $(OFILES)
+$(BUILD)/$(TARGET).elf: $(OFILES)
 	$(LD) $(LDFLAGS) $(OFILES) $(LIBS) -o $@
 
 $(BUILD)/%.o: source/%.c
@@ -57,9 +35,6 @@ $(BUILD)/%.o: source/%.c
 	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 
 clean:
-	rm -rf $(BUILD) $(ROM)
+	rm -rf $(BUILD) $(TARGET).nds
 
-# Include dependency files
--include $(DEPS)
-
-.PHONY: all clean
+-include $(OFILES:.o=.d)
