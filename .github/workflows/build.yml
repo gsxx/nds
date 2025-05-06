@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Also works on Fedora if needed
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -12,8 +12,8 @@ jobs:
       - name: Install devkitPro
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y wget
-          wget https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-3.0.2/devkitpro-pacman.deb
+          sudo apt-get install -y wget lsb-release
+          wget https://github.com/devkitPro/pacman/releases/download/v6.0.2/devkitpro-pacman.deb
           sudo dpkg -i devkitpro-pacman.deb
           sudo dkp-pacman -Syu --noconfirm
           sudo dkp-pacman -S --noconfirm devkitARM libnds nds-tools
@@ -27,8 +27,8 @@ jobs:
       - name: Compile NDS Homebrew
         run: make
 
-      - name: Upload NDS ROM
+      - name: Upload ROM
         uses: actions/upload-artifact@v4
         with:
           name: game.nds
-          path: ./your_game.nds  # Change to match your output filename
+          path: ./your_game.nds  # Adjust to your output filename
