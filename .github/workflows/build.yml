@@ -16,25 +16,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up environment
+      - name: Setup environment
         run: |
-          # Configura las variables esenciales
           echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
           echo "DEVKITARM=/opt/devkitpro/devkitARM" >> $GITHUB_ENV
           echo "PATH=$DEVKITARM/bin:$PATH" >> $GITHUB_ENV
 
       - name: Verify tools
         run: |
-          echo "=== Herramientas ==="
-          ls -la $DEVKITARM/bin/arm-none-eabi-gcc  # Verifica que el compilador existe
+          echo "=== Compiler ==="
           $DEVKITARM/bin/arm-none-eabi-gcc --version
-          ndstool --version
+          echo "=== ndstool ==="
+          ndstool 2>&1 | head -n 3  # Muestra solo las primeras líneas
 
-      - name: Build
+      - name: Build ROM
         run: |
           make -j$(nproc)
+          ls -la *.nds  # Verifica que se generó el archivo
 
-      - name: Upload ROM
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: nds-rom
