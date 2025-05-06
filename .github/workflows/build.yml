@@ -5,27 +5,15 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkitarm:latest  # Pre-configured with devkitARM + libnds
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install devkitPro
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y wget lsb-release
-          wget https://github.com/devkitPro/pacman/releases/download/v6.0.2/devkitpro-pacman.deb
-          sudo dpkg -i devkitpro-pacman.deb
-          sudo dkp-pacman -Syu --noconfirm
-          sudo dkp-pacman -S --noconfirm devkitARM libnds nds-tools
-
-      - name: Set up environment
-        run: |
-          echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
-          echo "DEVKITARM=/opt/devkitpro/devkitARM" >> $GITHUB_ENV
-          echo "$DEVKITARM/bin:$PATH" >> $GITHUB_PATH
-
       - name: Compile NDS Homebrew
-        run: make
+        run: |
+          make  # Assumes you have a Makefile
 
       - name: Upload ROM
         uses: actions/upload-artifact@v4
