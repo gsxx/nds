@@ -3,6 +3,9 @@
 
 .global _start
 _start:
-    b init
+    b startup
 
-.include "crt0_nds.inc"
+startup:
+    ldr sp, =0x027FFF00  @ Pila ARM9
+    bl  main             @ Llamar a main()
+    b   .                @ Bucle infinito al terminar

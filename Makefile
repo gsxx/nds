@@ -1,29 +1,16 @@
-# Project Name
 TARGET = hello_nds
-
-# Toolchain - Use the one in container's PATH
-PREFIX = arm-none-eabi-
-CC = $(PREFIX)gcc
-AS = $(PREFIX)as
-LD = $(PREFIX)gcc
-OBJCOPY = $(PREFIX)objcopy
-
-# Source Files
+BUILD = build
 SOURCES = source/main.c
 ASOURCES = source/arm9/crt0.s
 
-# Flags
+# Flags clave añadidos
 ARCH = -mthumb -mthumb-interwork
-CFLAGS = -Wall -O2 $(ARCH) -I/opt/devkitpro/libnds/include
-LDFLAGS = $(ARCH) -specs=ds_arm9.specs -L/opt/devkitpro/libnds/lib
-LIBS = -lnds
+CFLAGS = -Wall -O2 $(ARCH) -I$(DEVKITPRO)/libnds/include -DARM9
+LDFLAGS = $(ARCH) -specs=ds_arm9.specs -L$(DEVKITPRO)/libnds/lib
+LIBS = -lnds9 -lcalico -lfat -lmm9
 
-# File Lists
-BUILD = build
-OFILES = $(addprefix $(BUILD)/,$(notdir $(SOURCES:.c=.o)))
-AFILES = $(addprefix $(BUILD)/,$(notdir $(ASOURCES:.s=.o)))
+include $(DEVKITPRO)/libnds/nds_rules
 
-# Rules
 all: $(TARGET).nds
 
 $(TARGET).nds: $(BUILD)/$(TARGET).arm9
@@ -34,14 +21,6 @@ $(BUILD)/$(TARGET).arm9: $(BUILD)/$(TARGET).elf
 
 $(BUILD)/$(TARGET).elf: $(OFILES) $(AFILES)
 	$(LD) $(LDFLAGS) $(OFILES) $(AFILES) $(LIBS) -o $@
-
-$(BUILD)/%.o: source/%.c
-	@mkdir -p $(BUILD)
-	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
-
-$(BUILD)/%.o: source/arm9/%.s
-	@mkdir -p $(BUILD)
-	$(AS) $(ARCH) -c $< -o $@
 
 clean:
 	rm -rf $(BUILD) $(TARGET).nds
