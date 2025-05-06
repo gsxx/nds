@@ -4,22 +4,29 @@ on: [push, pull_request]
 
 jobs:
   build:
+    # Recommended: Use devkitPro's official Docker image
     runs-on: ubuntu-latest
     container:
-      image: devkitpro/devkitarm:latest  # Pre-configured with devkitARM + libnds
+      image: devkitpro/devkitarm:latest  # Pre-configured with all tools
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Check libnds installation
-        run: |
-          ls /opt/devkitpro/libnds  
-          dkp-pacman -Q | grep libnds 
-      - name: Compile NDS Homebrew
-        run: |
-          make  # Assumes you have a Makefile
 
-      - name: Upload ROM
+      - name: Verify Environment
+        run: |
+          echo "DEVKITPRO = $DEVKITPRO"
+          echo "DEVKITARM = $DEVKITARM"
+          dkp-pacman -Q | grep -E 'libnds|devkitARM'
+
+      - name: Build NDS Homebrew
+        run: |
+          make -j$(nproc)  # Build with parallel jobs
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: game.nds
-          path: ./your_game.nds  # Adjust to your output filename
+          name: nds-rom
+          path: |
+            *.nds
+            *.elf  # Optional: Include debug files
